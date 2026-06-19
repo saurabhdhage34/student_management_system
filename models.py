@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
-# Create your models here.
+
 
 class Course(models.Model):
     batch_name = models.CharField(max_length=100)
@@ -12,7 +12,6 @@ class Course(models.Model):
     trainer_name = models.CharField(max_length=100)
     start_date = models.DateField()
     duration = models.IntegerField()
-    # fees = models.IntegerField()
     description = models.TextField()
     course_image = models.ImageField(upload_to="courses/", null=True, blank=True)
     status = models.BooleanField(default=True)
@@ -35,7 +34,6 @@ class Batch(models.Model):
     def __str__(self):
         return self.batch_name
 
-   # ✅ add this
 
 class Notice(models.Model):
 
@@ -55,8 +53,6 @@ class Notice(models.Model):
 
     def __str__(self):
         return self.notice_title
-    
-
     
 
 class Trainer(models.Model):
@@ -96,35 +92,6 @@ class Add_Student_table(models.Model):
 
 
 
-
-
-# ================= STUDENT ADMIN FORM =================
-# class Add_Student_admin_tbl(models.Model):
-# class Add_Student_table(models.Model):
-#     STATUS_CHOICES = (
-#         ('Active', 'Active'),
-#         ('Inactive', 'Inactive'),
-#     )
-
-#     photo = models.ImageField(upload_to='student_photos/', null=True, blank=True)
-#     name = models.CharField(max_length=100)
-#     gender = models.CharField(max_length=20)
-#     email = models.EmailField()
-#     address = models.CharField(max_length=200)
-#     course_name = models.CharField(max_length=100)
-#     number = models.CharField(max_length=15)
-#     dob = models.DateField(null=True, blank=True)
-#     aadhar_no = models.CharField(max_length=12, null=True, blank=True)
-#     parent_name = models.CharField(max_length=100)
-#     admission_date = models.DateField(null=True, blank=True)
-#     batch_name = models.CharField(max_length=100)
-#     student_status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Active')
-#     fee_status = models.CharField(max_length=100)
-#     def __str__(self):
-#         return self.name 
-
-
-# ================ STUDENT REGISTER (Self Signup) ================
 class Ragistar_tbl(models.Model):
     name = models.CharField(max_length=100)
     surname = models.CharField(max_length=100)
@@ -152,11 +119,6 @@ class Fee(models.Model):
     def __str__(self):
         return self.course_name
     
-
-
-
-
-
 
 class Task(models.Model):
     batch_name = models.CharField(max_length=100, default="General")
@@ -197,7 +159,7 @@ class StudentFee(models.Model):
     created_at = models.DateTimeField(auto_now_add=True) # Automatically adds date/time
 
     def save(self, *args, **kwargs):
-        # Logic: Auto-calculate remaining fee before saving to DB
+        
         self.remaining_fee = float(self.total_fee) - float(self.paid_amount)
         super().save(*args, **kwargs)
 
@@ -272,7 +234,7 @@ def submit_task(request):
             status=status
         )
 
-        return redirect('student_dashboard')  # किंवा success page
+        return redirect('student_dashboard') 
 
     return render(request, 'submit_task.html')
 
@@ -282,7 +244,6 @@ def submit_task(request):
 from django.db import models
 from django.contrib.auth.models import User
 
-# १. प्रश्नांचे मॉडेल
 class Question(models.Model):
     question_text = models.CharField(max_length=500)
     option1 = models.CharField(max_length=200)
@@ -294,7 +255,7 @@ class Question(models.Model):
     def __str__(self):
         return self.question_text
 
-# २. विद्यार्थ्यांच्या निकालाचे मॉडेल
+
 class ExamResult(models.Model):
     student = models.ForeignKey(Add_Student_table, on_delete=models.CASCADE)
     total_questions = models.IntegerField()
