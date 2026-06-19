@@ -98,8 +98,8 @@ class Ragistar_tbl(models.Model):
     mobile = models.CharField(max_length=15)
     username = models.CharField(max_length=50, unique=True)
     password = models.CharField(max_length=50)
-    status = models.BooleanField(default=True)  # Active/Inactive student
-    added_by_admin = models.BooleanField(default=False)  # True if added by admin, False if self-registered
+    status = models.BooleanField(default=True) 
+    added_by_admin = models.BooleanField(default=False) 
 
     def __str__(self):
         return self.username 
@@ -114,7 +114,7 @@ class Fee(models.Model):
 
     total_fees = models.IntegerField(default=0)
 
-    created_at = models.DateTimeField(auto_now_add=True)  # optional but useful
+    created_at = models.DateTimeField(auto_now_add=True)  
 
     def __str__(self):
         return self.course_name
@@ -156,7 +156,7 @@ class StudentFee(models.Model):
     total_fee = models.DecimalField(max_digits=10, decimal_places=2)
     paid_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     remaining_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    created_at = models.DateTimeField(auto_now_add=True) # Automatically adds date/time
+    created_at = models.DateTimeField(auto_now_add=True) 
 
     def save(self, *args, **kwargs):
         
