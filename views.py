@@ -6,9 +6,6 @@ from .models import Add_Student_table
 from .models import Fee
 
 
-# Create your views here.
-
-
 def Dashboard(request):
 
     students_count = Add_Student_table.objects.count()
@@ -32,7 +29,7 @@ def Dashboard(request):
 def Homepage(request):
     return render(request, 'home.html')
 
-# Add Batch
+
 def add_batch(request):
 
     courses = Course.objects.all()
@@ -61,7 +58,7 @@ def add_batch(request):
 
     return render(request, 'add_batch.html', context)
 
-# View All Batches
+
 def view_all_batches(request):
 
     batches = Batch.objects.all()
@@ -85,7 +82,6 @@ def Add_course(request):
             trainer_name = request.POST.get('trainer_name'),
             start_date = request.POST.get('start_date'),
             duration = request.POST.get('duration'),
-            # fees = request.POST.get('fees'),
             description = request.POST.get('description'),
             course_image = request.FILES.get('course_image')
         )
@@ -137,7 +133,6 @@ def Update_course(request, id):
 def toggle_course_status(request, id):
     course = get_object_or_404(Course, id=id)
 
-    # True -> False , False -> True
     course.status = not course.status
     course.save()
 
@@ -146,7 +141,6 @@ def toggle_course_status(request, id):
 
 
 
-# Delete Batch
 def delete_batch(request, id):
 
     batch = get_object_or_404(Batch, id=id)
@@ -155,7 +149,7 @@ def delete_batch(request, id):
     return redirect('view_all_batches')
 
 
-# Toggle Status
+
 def toggle_batch_status(request, id):
 
     batch = get_object_or_404(Batch, id=id)
@@ -165,14 +159,6 @@ def toggle_batch_status(request, id):
 
     return redirect('view_all_batches')
 
-# def Homepage(request):
-#     return render(request,'home.html')
-
-
-
-
-
-
 
 def Add_notice(request):
 
@@ -181,7 +167,7 @@ def Add_notice(request):
     
 
     if selected_batch:
-        # 🔥 MAIN FILTER (IMPORTANT)
+        
         courses = Course.objects.filter(batch_name=selected_batch)
     else:
         courses = Course.objects.none()
@@ -246,17 +232,9 @@ def update_notice(request, id):
 
 
 
-def delete_notice(request, notice_id):  # Change 'id' to 'notice_id'
-    # Use filter().delete() to avoid the "MultipleObjectsReturned" error from earlier
+def delete_notice(request, notice_id):  
     Notice.objects.filter(id=notice_id).delete() 
     return redirect('view_all_notice')
-
-
-#  DELETE TASK
-# def delete_task(request, task_id):
-#     task = get_object_or_404(Task, id=task_id)
-#     task.delete()
-#     return redirect('view_task')
 
 
 def toggle_notice(request, id):
@@ -353,7 +331,6 @@ from .models import Course, Batch, Add_Student_table
 
 def Add_Student(request):
 
-    # 🔥 dropdown साठी data
     courses = Course.objects.all()
     batches = Batch.objects.all()
     fees = Fee.objects.all()
@@ -366,7 +343,7 @@ def Add_Student(request):
         email = request.POST.get('student_email')
         address = request.POST.get('student_address')
 
-        batch_name = request.POST.get('batch_name')   # 🔥 NEW
+        batch_name = request.POST.get('batch_name')   
         course_name = request.POST.get('student_course_name')
 
         number = request.POST.get('student_number')
@@ -380,7 +357,6 @@ def Add_Student(request):
 
         username = request.POST.get("username")
         password = request.POST.get("password")
-        # ✅ SAVE DATA
         Add_Student_table.objects.create(
             photo=photo,
             name=name,
@@ -445,8 +421,6 @@ def Edit_Student(request, id):
         student.student_status = request.POST.get('student_status')
         student.fee_status = request.POST.get('fee_status')
 
-        
-       
         student.save()
 
         return redirect('view_all_student')
@@ -470,16 +444,16 @@ from django.contrib import messages
 from .models import Ragistar_tbl
 
 
-# ================= HOME PAGE =================
+
 def Home_page(request):
     return render(request, 'student_home_1.html')
 
 
-# ================= STUDENT SECTION =================
 
 
 
-# ================= STUDENT LOGIN SECTION =================
+
+
 
 def Stlogin_page_view(request):
     if request.method == "POST":
@@ -519,32 +493,30 @@ from .models import *
 
 def student_home_1(request, id):
 
-    # ✅ Session check
+    
     session_student_id = request.session.get('student_id')
     if str(session_student_id) != str(id):
         return redirect('student_login')
 
-    # ✅ Student object
+    
     student = get_object_or_404(Add_Student_table, id=id)
 
 
     attendance = Attendance.objects.filter(student=student).order_by('-date')[:10]
 
-    # ✅ Submitted task IDs (HIDE logic)
+    
     submitted_task_ids = TaskReport_1.objects.filter(
         student_name=student
     ).values_list('task_id', flat=True)
 
-    # ✅ ONLY not submitted tasks show
+    
     tasks = Task.objects.filter(
         batch_name=student.batch_name,
         course_name=student.course_name
     ).exclude(id__in=submitted_task_ids).order_by('-task_no')
 
-    # ✅ Reports (for result / history)
     reports = TaskReport_1.objects.filter(student_name=student)
 
-    # ✅ Fee logic
     fee_history = StudentFee.objects.filter(
         student_name=student.name
     ).order_by('-id')
@@ -552,27 +524,22 @@ def student_home_1(request, id):
     total_paid = fee_history.aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
     last_record = fee_history.first()
 
-    # चुकीचे:
-# my_attendance = Attendance.objects.filter(student=student_obj).order_items('-date')
-
-# बरोबर (हा कोड वापरा):
+   
     present_count = Attendance.objects.filter(student=student, status="Present").count()
     
     remaining_fee = last_record.remaining_fee if last_record else 0
     total_fee = last_record.total_fee if last_record else 0
 
-    # ✅ Notices
     notices = Notice.objects.filter(
         batch_name=student.batch_name,
         course_name=student.course_name,
         status=True
     ).order_by('-created_at')
     exam_given = ExamResult.objects.filter(student=student).exists()
-    # ✅ Final context
     context = {
         'student': student,
         'tasks': tasks,
-        'exam_given': exam_given,         # 🔥 hidden tasks applied
+        'exam_given': exam_given,        
         'reports': reports,
         'attendance': attendance,
         'notices': notices,
@@ -618,7 +585,6 @@ def Strag_page_view(request):
     return render(request, 'student_registration.html')
 
 
-# Student Home
 def Student_Home(request):
 
     student_id = request.session.get('student_id')
@@ -631,7 +597,7 @@ def Student_Home(request):
     return render(request, 'student_home.html', {'student': student})
 
 
-# Student Logout
+
 def Student_Logout(request):
 
     request.session.flush()
@@ -639,9 +605,8 @@ def Student_Logout(request):
     return redirect('stlogin')
 
 
-# ================= ADMIN SECTION =================
 
-# Admin Login
+
 def Admin_login(request):
 
     if request.method == "POST":
@@ -662,7 +627,7 @@ def Admin_login(request):
     return render(request, 'admin_login.html')
 
 
-# Admin Dashboard
+
 def Dashbord(request):
 
     if not request.session.get('admin'):
@@ -695,15 +660,12 @@ def Add_fee(request):
         course = request.POST.get('course_name')
         fees_raw = request.POST.get('fees')
 
-        # --- THE FIX ---
+        
         try:
-            # This converts '1000' to 1000. 
-            # If it gets 'exit', it jumps straight to the 'except' block.
             final_fees = int(fees_raw) 
         except (ValueError, TypeError):
-            # If data is 'exit' or empty, we set it to 0 so the database doesn't crash
             final_fees = 0 
-        # ----------------
+ 
 
         Fee.objects.create(
             batch_name=batch,
@@ -719,10 +681,7 @@ def Add_fee(request):
         'selected_batch': selected_batch
     })
 
-# def View_all_fee(request):
-#     # Fetch all records to show in the table
-#     fees_records = Add_Student_table.objects.all()
-#     return render(request, 'view_all_fee.html', {'fees_records': fees_records})
+
 
 def View_all_fee(request):
     fees_records = Fee.objects.all()   
@@ -736,16 +695,15 @@ def View_all_fee(request):
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Fee, Batch, Course  
 
-# --- Delete Fee Record ---
+
 def delete_fee(request, id):
   
     record = get_object_or_404(Fee, id=id) 
     record.delete()
     return redirect('view_all_fee')
 
-# --- Edit Fee Record ---
 def edit_fee(request, id):
-    # येथे सुद्धा Fee मॉडेल वापरा
+    
     record = get_object_or_404(Fee, id=id) 
     courses = Course.objects.all()
     batches = Batch.objects.all()
@@ -770,7 +728,6 @@ from django.shortcuts import render, redirect
 def add_taskss(request):
     batches = Batch.objects.all()
     
-    # 1. Get the batch from the URL (for filtering the course dropdown)
     selected_batch = request.GET.get('batch_name') 
 
     if selected_batch:
@@ -779,7 +736,6 @@ def add_taskss(request):
         courses = Course.objects.none()
 
     if request.method == "POST":
-        # 2. Use 'batch_name' here to match the HTML select name
         batch = request.POST.get('batch_name') 
         course = request.POST.get('course')
         task_no = request.POST.get('task_no')
@@ -788,7 +744,6 @@ def add_taskss(request):
         image = request.FILES.get('image')
         pdf = request.FILES.get('pdf')
 
-        # 3. Create the task (Make sure 'batch' is not None)
         if batch:
             Task.objects.create(
                 batch_name=batch,
@@ -799,7 +754,7 @@ def add_taskss(request):
                 image=image,
                 pdf=pdf
             )
-            return redirect('view_task') # Redirect to the view page
+            return redirect('view_task')
         
     return render(request, 'add_task.html', {
         'courses': courses,
@@ -819,18 +774,15 @@ def view_all_task(request):
 
 from django.shortcuts import render, redirect, get_object_or_404
 
-# DELETE TASK
 def delete_task(request, task_id):
     task = get_object_or_404(Task, id=task_id)
     task.delete()
     return redirect('view_task')
-
-# EDIT/UPDATE TASK
 def edit_task(request, task_id):
     task = get_object_or_404(Task, id=task_id)
     batches = Batch.objects.all()
     
-    # Filtering logic for the course dropdown
+    
     selected_batch = request.GET.get('batch_name') or task.batch_name
     courses = Course.objects.filter(batch_name=selected_batch)
 
@@ -841,7 +793,7 @@ def edit_task(request, task_id):
         task.task_title = request.POST.get('task_title')
         task.task_definition = request.POST.get('task_definition')
         
-        # Only update files if new ones are uploaded
+        
         if request.FILES.get('image'):
             task.image = request.FILES.get('image')
         if request.FILES.get('pdf'):
@@ -884,25 +836,21 @@ def add_student_fee(request):
 
     if selected_batch and selected_course:
         students = Add_Student_table.objects.filter(batch_name=selected_batch, course_name=selected_course)
-        
-        # जर विद्यार्थी निवडला असेल, तर डेटाबेसमध्ये त्याची जुनी 'Remaining Fee' तपासा
         if selected_student:
-            from .models import StudentFee # तुमच्या मॉडेलचे नाव तपासा
+            from .models import StudentFee
             last_record = StudentFee.objects.filter(student_name=selected_student, course_name=selected_course).order_by('-id').first()
             
             if last_record:
                 auto_total_fee = last_record.remaining_fee
             else:
-                # जर नवीन विद्यार्थी असेल तर कोर्सची मूळ फी आणा
+               ा
                 fee_obj = Fee.objects.filter(course_name=selected_course, batch_name=selected_batch).first()
                 auto_total_fee = fee_obj.total_fees if fee_obj else 0
         else:
-            # विद्यार्थी निवडण्यापूर्वी कोर्स फी दाखवा
             fee_obj = Fee.objects.filter(course_name=selected_course, batch_name=selected_batch).first()
             auto_total_fee = fee_obj.total_fees if fee_obj else 0
 
     if request.method == "POST":
-        # डेटा सेव्ह करण्याचे लॉजिक
         StudentFee.objects.create(
             student_name=request.POST.get('student_name'),
             batch_name=request.POST.get('batch_name'),
@@ -920,8 +868,7 @@ def add_student_fee(request):
 
 
 def view_all_student_fees(request):
-    # Fetch all records from the StudentFee model
-    fees_records = StudentFee.objects.all().order_by('-id') # Shows latest records first
+    fees_records = StudentFee.objects.all().order_by('-id') 
     
     return render(request, 'view_all_student_fees.html', {
         'fees_records': fees_records
@@ -984,13 +931,11 @@ def submit_task(request, id):
     task = get_object_or_404(Task, id=id)
 
     if request.method == "POST":
-        # Form madhun baki data ghene
         task_answer = request.POST.get('task_answer')
         file = request.FILES.get('task_file')
         status = request.POST.get('status', 'Complete') 
         submission_date = request.POST.get('submission_date')
 
-        # 3. Data Save kara
         TaskReport_1.objects.create(
             student_name_id = student.id,       
             task_title=task.task_title,  
@@ -1023,7 +968,6 @@ def select_students(request):
     if selected_batch:
         courses = Course.objects.filter(batch_name=selected_batch)
 
-    # Batch + Course → Students + Tasks
     if selected_batch and selected_course:
         students = Add_Student_table.objects.filter(
             batch_name=selected_batch,
@@ -1148,26 +1092,6 @@ def view_attendance(request):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Question, ExamResult
@@ -1175,13 +1099,8 @@ from .forms import QuestionFormSet
 
 
 
-# =====================================================================
 
 def add_q_section(request):
-    """
-    Handles rendering the question formset to populate new test banks.
-    Maps directly to URL path name 'add_q_section'.
-    """
     if request.method == 'POST':
         formset = QuestionFormSet(request.POST)
         if formset.is_valid():
@@ -1193,17 +1112,10 @@ def add_q_section(request):
 
 
 def view_all_q_sections(request):
-    """
-    Renders a comprehensive list of all exam results and performance metrics.
-    Maps directly to URL path name 'view_all_q_sections'.
-    """
     results = ExamResult.objects.all().order_by('-submitted_at')
     return render(request, 'admin_dashboard.html', {'results': results})
 
 
-# =====================================================================
-#  LEGACY BACKWARD-COMPATIBLE ADMIN PATHS
-# =====================================================================
 
 def admin_add_questions(request):
     """Fallback router keeping older paths valid."""
@@ -1231,11 +1143,11 @@ from .models import Question, ExamResult
 
 def student_exam_page(request):
 
-    # 🔥 LOGIN CHECK
+   
     student_id = request.session.get('student_id')
 
     if not student_id:
-        return redirect('index')   # login page
+        return redirect('index')   
 
     student = Add_Student_table.objects.get(id=student_id)
 
@@ -1328,65 +1240,6 @@ def chat(request):
 
 
 
-    
-# import random
-# from django.shortcuts import render, redirect
-# from django.contrib.auth import login
-# from django.contrib.auth.models import User
-# from django.core.mail import send_mail
-
-# def login_view(request):
-#      # Your file variable
-
-#     if request.method == "POST":
-#         email = request.POST.get("email")
-#         otp = request.POST.get("otp")
-
-#         # STEP 1: OTP send
-#         if email and not otp:
-#             otp_code = str(random.randint(1000, 9999))
-#             request.session['otp'] = otp_code
-#             request.session['email'] = email
-
-#             send_mail(
-#                 "Login OTP | EMP Manage Software",
-#                 f"Welcome to EMP Manage Software from Saurabh Dhage (Owner).\n\nYour OTP is: {otp_code}",
-#                 "saurabhdhage20114@gmail.com",
-#                 [email],
-#                 fail_silently=False,
-#             )
-
-#             return render(request, "login.html", {
-#                 "email": email,
-#                 "msg": "OTP sent to your email for file: ",
-                
-#             })
-
-#         # STEP 2: OTP verify
-#         elif otp:
-#             session_otp = request.session.get("otp")
-#             session_email = request.session.get("email")
-
-#             if otp == session_otp:
-#                 user, created = User.objects.get_or_create(
-#                     username=session_email,
-#                     email=session_email
-#                 )
-#                 login(request, user)
-#                 return redirect("home")
-#             else:
-#                 return render(request, "login.html", {
-#                     "error": "Invalid OTP. Please try again.",
-#                     "email": session_email # Keep the email visible
-#                 })
-        
-#         # FIX: If POST is sent but logic fails (e.g. empty fields)
-#         else:
-#             return render(request, "login.html", {"error": "Please enter your details."})
-
-#     # STEP 3: Initial GET request (User first opens the page)
-#     return render(request, "login.html")
-        # ... rest of your OTP verification logic ...
 
 
 
@@ -1396,7 +1249,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
-from django.utils.html import strip_tags  # 👈 हा नवीन import वरती नक्की जोडा
+from django.utils.html import strip_tags  ा
 
 def mock_ai_domain_validator(email):
     """
@@ -1425,7 +1278,7 @@ def login_view(request):
         email = request.POST.get("email", "").strip()
         otp = request.POST.get("otp", "").strip()
 
-        # STEP 1: Process and Dispatch Secure Email Token Authentication
+       
         if email and not otp:
             is_valid_domain, message = mock_ai_domain_validator(email)
             if not is_valid_domain:
@@ -1434,13 +1287,12 @@ def login_view(request):
                     "filename": current_file_context
                 })
 
-            # Generate 4-digit code
+            
             otp_code = str(random.randint(1000, 9999))
             request.session['otp'] = otp_code
             request.session['email'] = email
             request.session.modified = True 
 
-            # ==================== 🔒 इथे तुमचा नवीन प्रोग्रॅम आणि ईमेल कोड सुरू होतो ====================
             subject = "🔒 Secure Access Token | Academia AI Studio"
             
             html_message = f"""
@@ -1469,7 +1321,7 @@ def login_view(request):
                 </div>
                 <div style="margin-top: 35px; border-top: 1px solid #f3f4f6; padding-top: 20px; text-align: center; color: #9ca3af; font-size: 12px; line-height: 1.5;">
     
-    <!-- 👤 तुमचा प्रोफाईल फोटो (इथे तुमची लाईव्ह इमेज लिंक टाका) -->
+    
     <div style="margin-bottom: 12px;">
         <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:&s" 
              alt="Saurabh Dhage" 
@@ -1502,7 +1354,7 @@ def login_view(request):
                     "filename": current_file_context,
                     "show_otp": True
                 })
-            # ==================== 🔒 ईमेल सेंड करण्याचा कोड इथे संपतो ====================
+           
                 
             except Exception as e:
                 return render(request, "login.html", {
@@ -1510,7 +1362,6 @@ def login_view(request):
                     "filename": current_file_context
                 })
 
-        # STEP 2: Token Verification Checkpoint Logic Execution
         elif otp:
             session_otp = request.session.get("otp")
             session_email = request.session.get("email")
